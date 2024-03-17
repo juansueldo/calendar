@@ -1,0 +1,12 @@
+.fc-event-title .badge {
+    display: block;
+    width: 100%;
+}
+a{
+    text-decoration: none;
+}
+.badge{
+    color: black !important;
+    display: block;
+    width: 100%;
+}
