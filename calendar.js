@@ -167,30 +167,35 @@ function assignColorToId(id) {
 function generateEventHTML(event, currentDate) {
     var eventStart = new Date(event.startdate);
     var eventEnd = new Date(event.enddate);
-    var eventDuration = (eventEnd - eventStart) / (1000 * 60 * 60); // Duración del evento en horas
+    var eventMonth = eventStart.getMonth();
+    var eventYear = eventStart.getFullYear();
 
+    // Verificar si el evento está dentro del mes y año actual
+    if (eventMonth === currentMonth && eventYear === currentYear) {
+        var eventDuration = (eventEnd - eventStart) / (1000 * 60 * 60); // Duración del evento en horas
 
-     // Si el día actual coincide con la fecha de inicio y finalización del evento
-     if (currentDate === eventStart.getDate() && currentDate === eventEnd.getDate()) {
-        return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/'+event.id+'" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">'+ eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">'+event.title+'</div></a></span>';
+        // Si el día actual coincide con la fecha de inicio y finalización del evento
+        if (currentDate === eventStart.getDate() && currentDate === eventEnd.getDate()) {
+            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">' + eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">' + event.title + '</div></a></span>';
+        }
+        // Si el día actual coincide con la fecha de inicio del evento
+        else if (currentDate === eventStart.getDate()) {
+            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">' + eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">' + event.title + '</div></a></span>';
+        }
+        // Si el día actual coincide con la fecha de finalización del evento
+        else if (currentDate === eventEnd.getDate()) {
+            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">' + eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">' + event.title + '</div></a></span>';
+        }
+        // Si el evento dura más de un día y el día actual está entre la fecha de inicio y finalización del evento
+        else if (eventDuration >= 24 && currentDate > eventStart.getDate() && currentDate < eventEnd.getDate()) {
+            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1">' + event.title + '</a></span>';
+        }
     }
-    // Si el día actual coincide con la fecha de inicio del evento
-    else if (currentDate === eventStart.getDate()) {
-        return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/'+event.id+'" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">'+ eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">'+event.title+'</div></a></span>';
-    }
-    // Si el día actual coincide con la fecha de finalización del evento
-    else if (currentDate === eventEnd.getDate()) {
-        return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/'+event.id+'" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">'+ eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">'+event.title+'</div></a></span>';
-    }
-    // Si el evento dura más de un día y el día actual está entre la fecha de inicio y finalización del evento
-    else if (eventDuration >= 24 && currentDate > eventStart.getDate() && currentDate < eventEnd.getDate()) {
-        return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/'+event.id+'" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1">'+event.title+'</a></span>';
-    }
-    // En todos los demás casos, no mostrar nada
-    else {
-        return '';
-    }
+
+    // Si el evento no está dentro del mes y año actual, no mostrar nada
+    return '';
 }
+
 
 function previousMonth() {
     currentMonth--;
