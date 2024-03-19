@@ -24,14 +24,14 @@ var eventsData = [
     
 ];
 var bootstrapColors = [
-    'bg-primary',
-    'bg-secondary',
-    'bg-success',
-    'bg-danger',
-    'bg-warning',
-    'bg-info',
-    'bg-light',
-    'bg-dark'
+    'primary',
+    'success',
+    'danger',
+    'warning',
+    'info',
+    'success',
+    'secondary',
+    'primary'
 ];
 
 // Definir un índice para el color actual
@@ -45,69 +45,127 @@ function generateCalendar(month, year) {
     generateCalendarBody(calendarContainer, month, year);
 }
 
-function createCalendarHeader(container, month, year){
+function createCalendarHeader(container, month, year) {
     var calendarHeader = document.createElement('div');
-    calendarHeader.classList.add("calendar-header");
-    calendarHeader.innerHTML = '<div class="d-flex justify-content-between align-items-center"><button class="btn btn-primary" onclick="previousMonth()"><span class="ti ti-chevron-left text-dark" role="img">Prev</span></button><h2 id="month-year" class="m-0 text-dark">' + months[month] + ' ' + year + '</h2><button class="btn btn-primary" onclick="nextMonth()"><span class="ti ti-chevron-right text-dark" role="img">Next</span></button></div>';
+    calendarHeader.classList.add("flatpickr-months");
+
+    calendarHeader.innerHTML = 
+        '<div sytle="display:flex;" class="mb-3 mt-3">'+
+            '<span class="ti ti-chevron-left p-2" style="cursor:pointer;" data-icon="tabler:chevron-left" onclick="previousMonth()"></span>' +
+            '<span class="ti ti-chevron-right p-2" style="cursor:pointer;"  data-icon="tabler:chevron-right" onclick="nextMonth()"></span>' +
+            '<span class="cur-month">' + months[month] + ' '+ year + '</span>' +
+        '</div>' ;
+
     container.appendChild(calendarHeader);
 }
 
+
+
+
 function generateCalendarBody(container, month, year) {
-    var calendarBody = document.createElement('div');
-    calendarBody.classList.add("calendar-container");
-    container.appendChild(calendarBody);
+  var calendarBody = document.createElement('div');
+  calendarBody.classList.add("calendar-container");
+  container.appendChild(calendarBody);
+
+  var table = document.createElement('table');
+  table.classList.add("table", "table-bordered","fc-scrollgrid", "fc-scrollgrid-liquid");
+  var thead = document.createElement('thead');
+  var tbody = document.createElement('tbody');
+  tbody.setAttribute('id', 'calendar-body');
+  thead.style.borderColor = "#434968";
+  createTableHeader(thead);
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  calendarBody.appendChild(table);
+
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var date = 1;
+
+  for (var i = 0; i < 6; i++) {
+      var row = document.createElement('tr');
   
-    var table = document.createElement('table');
-    table.classList.add("table", "table-bordered","fc-scrollgrid", "fc-scrollgrid-liquid");
-    var thead = document.createElement('thead');
-    var tbody = document.createElement('tbody');
-    tbody.setAttribute('id', 'calendar-body');
-  
-    createTableHeader(thead);
-    table.appendChild(thead);
-    table.appendChild(tbody);
-    calendarBody.appendChild(table);
-  
-    var firstDay = new Date(year, month, 1).getDay();
-    var daysInMonth = new Date(year, month + 1, 0).getDate();
-    var date = 1;
-  
-    for (var i = 0; i < 6; i++) {
-        var row = document.createElement('tr');
-    
-        for (var j = 0; j < 7; j++) {
-            var cell = document.createElement('td');
-            cell.style.cursor = "pointer";
-            cell.style.width = "150px"; 
-            cell.style.height = "150px";
-            cell.classList.add("c-day", "fc-day-wed", "fc-day-past", "fc-day-other", "fc-daygrid-day", "text-center");
-  
-            if (i === 0 && j < firstDay) {
-                var daysInPreviousMonth = new Date(year, month, 0).getDate();
-                cell.innerHTML = '<div class="fc-daygrid-day-frame"><div class="fc-daygrid-day-top"><a title="Go to ' + months[month - 1] + ' ' + (daysInPreviousMonth - firstDay + j + 1) + ', ' + year + '" data-navlink="" tabindex="0" id="fc-dom-' + (daysInPreviousMonth - firstDay + j + 1) + '" class="fc-daygrid-day-number text-muted">' + (daysInPreviousMonth - firstDay + j + 1) +'</a></div><div class="fc-daygrid-day-events"></div></div>';
-            } else if (date > daysInMonth) {
-                cell.innerHTML = '<div class="fc-daygrid-day-frame"><div class="fc-daygrid-day-top"><a title="Go to ' + months[month + 1] + ' ' + (date - daysInMonth) + ', ' + year + '" data-navlink="" tabindex="0" id="fc-dom-' + (date - daysInMonth) + '" class="fc-daygrid-day-number text-muted">' + (date - daysInMonth) + '</a></div><div class="fc-daygrid-day-events"></div></div>';
-                date++;
-            } else {
-                var eventsToShow = getEventsForDay(month, year, date);
-                var eventListHTML = eventsToShow.map(event => generateEventHTML(event, date)).join('');
-                cell.innerHTML = '<div class="fc-daygrid-day-frame"><div class="fc-daygrid-day-top"><a title="Go to ' + months[month] + ' ' + date + ', ' + year + '" data-navlink="" tabindex="0" id="fc-dom-' + date + '" class="fc-daygrid-day-number">' + date +  '</a></div><div class="fc-daygrid-day-events">' + eventListHTML + '</div></div>';
-  
-                if (date === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
-                    cell.style.fontWeight = 'bold';
-                }
-  
-                date++;
-            }
-  
-            row.appendChild(cell);
-        }
-        tbody.appendChild(row);
-  
-        if (date > daysInMonth && i > 0) {
-            break;
-        }
-    }
+      for (var j = 0; j < 7; j++) {
+          var cell = document.createElement('td');
+          cell.style.cursor = "pointer";
+          cell.style.width = "100px";
+          cell.style.height = "100px";
+          cell.classList.add("c-day", "fc-day-wed", "fc-day-past", "fc-day-other", "fc-daygrid-day");
+          cell.style.position="relative";
+          cell.style.padding=0;
+          cell.style.borderColor = "#434968";
+          cell.style.overflow = "hidden";
+
+          var eventsToShow = getEventsForDay(month, year, date);
+          var eventListHTML = eventsToShow.map(event => generateEventHTML(event, date)).join('');
+          if (i === 0 && j < firstDay) {
+              var daysInPreviousMonth = new Date(year, month, 0).getDate();
+              cell.innerHTML = `<div class="fc-daygrid-day-frame" style="max-height: 100px; overflow: hidden;">
+                                  <div class="fc-daygrid-day-top" style="position:absolute;top:0;left:0;">
+                                    <a title="Go to ${months[month - 1]} ${(daysInPreviousMonth - firstDay + j + 1)}, ${year}" data-navlink="" tabindex="0" id="fc-dom-${(daysInPreviousMonth - firstDay + j + 1)}" class="fc-daygrid-day-number text-muted m-2">${(daysInPreviousMonth - firstDay + j + 1)}</a>
+                                  </div>
+                                <div class="fc-daygrid-day-events" style="margin-top:20px;height: 110px;overflow:hidden;">${eventListHTML}</div>
+                              </div>
+                               
+                              `;
+          } else if (date > daysInMonth) {
+              cell.innerHTML = `<div class="fc-daygrid-day-frame" style="max-height: 100px;overflow: hidden;">
+                                  <div class="fc-daygrid-day-top" style="position:absolute;top:0;left:0;">
+                                    <a title="Go to ${months[month + 1]} ${(date - daysInMonth)}, ${year}" data-navlink="" tabindex="0" id="fc-dom-${(date - daysInMonth)}" class="fc-daygrid-day-number text-muted m-2">${(date - daysInMonth)}</a>
+                                  </div>
+                                <div class="fc-daygrid-day-events" style="margin-top:20px;height: 100px;overflow:hidden;">${eventListHTML}</div>
+                              </div>`;
+              date++;
+          } else {
+              var eventsToShow = getEventsForDay(month, year, date);
+              // Ordenar los eventos según su fecha de finalización
+              eventsToShow.sort((a, b) => {
+                  var aEnd = new Date(a.enddate).getDate();
+                  var bEnd = new Date(b.enddate).getDate();
+                  if (aEnd === bEnd) return 0;
+                  return aEnd > bEnd ? -1 : 1;
+              });
+              var eventListHTML = eventsToShow.map(event => generateEventHTML(event, date)).join('');
+              var visibleEvents = eventsToShow.slice(0, 2); // Obtener los primeros tres elementos
+              var hiddenEventCount = eventsToShow.length - visibleEvents.length; // Calcular la cantidad de elementos ocultos
+
+              // Crear HTML para los eventos visibles
+              var visibleEventsHTML = visibleEvents.map(event => generateEventHTML(event, date)).join('');
+
+              // Crear la leyenda para los eventos ocultos
+              var hiddenEventsLegend = hiddenEventCount > 0 ? `+${hiddenEventCount} more` : '';
+
+              // Combinar HTML de eventos visibles y leyenda de eventos ocultos
+              var eventListVisibleHTML = `${visibleEventsHTML}<span class="hidden-events">${hiddenEventsLegend}</span>`;
+
+              cell.innerHTML = `<div class="fc-daygrid-day-frame" style="max-height: 100px; overflow: hidden;">
+                                    <div id="hidden-date-info" style="display: none;">
+                                        <span class="hidden-month">${month}</span>
+                                        <span class="hidden-date">${date}</span>
+                                        <span class="hidden-year">${year}</span>
+                                    </div>
+                                    <div class="fc-daygrid-day-top" style="position:absolute;top:0;left:0;">
+                                        <a title="Go to ${months[month]} ${date}, ${year}" data-navlink="" tabindex="0" id="fc-dom-${date}" class="fc-daygrid-day-number m-2">${date}</a>
+                                    </div>
+                                    <div class="fc-daygrid-day-events" style="margin-top:20px;height: 110px;overflow:hidden;">${eventListVisibleHTML}</div>
+                                </div>`;
+              if (date === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+                  cell.style.fontWeight = 'bold';
+              }
+
+              date++;
+          }
+
+          row.appendChild(cell);
+      }
+      tbody.appendChild(row);
+
+      if (date > daysInMonth && i > 0) {
+          break;
+      }
+  }
+  showPopUpEvents();
+
 }
 
 
@@ -119,9 +177,9 @@ function createTableHeader(thead) {
 function createTableCell(month, year, firstDay, daysInMonth, date) {
     var cell = document.createElement('td');
     cell.style.cursor = "pointer";
-    cell.style.width = "150px"; 
-    cell.style.height = "150px";
-    cell.classList.add("c-day", "fc-day-wed", "fc-day-past", "fc-day-other", "fc-daygrid-day", "text-center");
+    cell.style.width = "100px"; 
+    cell.style.height = "100px";
+    cell.classList.add("c-day", "fc-day-wed", "fc-day-past", "fc-day-other", "fc-daygrid-day");
   
     if (date <= daysInMonth || (date > daysInMonth && firstDay > 0)) {
       var dayNumber = date <= daysInMonth ? date : date - daysInMonth;
@@ -130,12 +188,6 @@ function createTableCell(month, year, firstDay, daysInMonth, date) {
     return cell;
 }
 
-// Función para generar el HTML de una celda de la tabla del calendario
-function generateCellHTML(month, year, day) {
-    var eventsToShow = getEventsForDay(month, year, day);
-    var eventListHTML = eventsToShow.map(event => generateEventHTML(event)).join('');
-    return '<div class="fc-daygrid-day-frame"><div class="fc-daygrid-day-top"><a title="Go to ' + months[month] + ' ' + day + ', ' + year + '" data-navlink="" tabindex="0" id="fc-dom-' + day + '" class="fc-daygrid-day-number">' + day +  '</a></div><div class="fc-daygrid-day-events">' + eventListHTML + '</div></div>';
-}
 
 // Función para obtener los eventos para un día dado
 function getEventsForDay(month, year, day) {
@@ -164,37 +216,69 @@ function assignColorToId(id) {
     return idColors[id];
 }
 // Función para generar el HTML de un evento
-function generateEventHTML(event, currentDate) {
-    var eventStart = new Date(event.startdate);
-    var eventEnd = new Date(event.enddate);
-    var eventMonth = eventStart.getMonth();
-    var eventYear = eventStart.getFullYear();
+function generateEventHTML(event, currentDate, show=false) {
+  var eventStart = new Date(event.startdate);
+  var eventEnd = new Date(event.enddate);
+  var eventMonthStart = eventStart.getMonth();
+  var eventMonthEnd = eventEnd.getMonth();
+  var eventYearStart = eventStart.getFullYear();
+  var eventYearEnd = eventEnd.getFullYear();
+  var eventDateStart = eventStart.getDate();
+  var eventDateEnd = eventEnd.getDate();
 
-    // Verificar si el evento está dentro del mes y año actual
-    if (eventMonth === currentMonth && eventYear === currentYear) {
-        var eventDuration = (eventEnd - eventStart) / (1000 * 60 * 60); // Duración del evento en horas
-
-        // Si el día actual coincide con la fecha de inicio y finalización del evento
-        if (currentDate === eventStart.getDate() && currentDate === eventEnd.getDate()) {
-            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">' + eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">' + event.title + '</div></a></span>';
-        }
-        // Si el día actual coincide con la fecha de inicio del evento
-        else if (currentDate === eventStart.getDate()) {
-            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">' + eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">' + event.title + '</div></a></span>';
-        }
-        // Si el día actual coincide con la fecha de finalización del evento
-        else if (currentDate === eventEnd.getDate()) {
-            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1"><div class="fc-daygrid-event-dot"></div><div class="fc-event-time">' + eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div><div class="fc-event-title">' + event.title + '</div></a></span>';
-        }
-        // Si el evento dura más de un día y el día actual está entre la fecha de inicio y finalización del evento
-        else if (eventDuration >= 24 && currentDate > eventStart.getDate() && currentDate < eventEnd.getDate()) {
-            return '<span class="badge ' + assignColorToId(event.id) + '"><a data-xtz-source="/account/calendar/edit/' + event.id + '" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-info mb-1">' + event.title + '</a></span>';
-        }
+  // Verificar si el evento está dentro del mes y año actual
+  if ((eventMonthStart === currentMonth && eventYearStart === currentYear) || (eventMonthEnd === currentMonth && eventYearEnd === currentYear)) {
+      // Si el día actual coincide con la fecha de inicio y finalización del evento
+      if (currentDate === eventStart.getDate() && currentDate === eventEnd.getDate()) {
+          return generateEventLink(event, eventStart, eventEnd, assignColorToId(event.id), true);
+      }
+      // Si el día actual coincide con la fecha de inicio del evento
+      else if (currentDate === eventStart.getDate()) {
+          return generateEventLink(event, eventStart, eventEnd, assignColorToId(event.id), true, true);
+      }
+      // Si el día actual coincide con la fecha de finalización del evento
+      else if (currentDate === eventEnd.getDate()) {
+          return generateEventLink(event, eventStart, eventEnd, assignColorToId(event.id), true,false);
+      }
+      // Si el día actual está entre la fecha de inicio y finalización del evento
+      else if (currentDate > eventStart.getDate() || currentDate < eventEnd.getDate()) {
+          return generateEventLink(event, eventStart, eventEnd, assignColorToId(event.id), show);
+      }
+  }
+  /*if(currentMonth > eventMonthStart && currentMonth < eventMonthEnd){
+    return generateEventLink(event, eventStart, eventEnd, assignColorToId(event.id), show);
+  }*/
+  else if((currentMonth > eventMonthStart && eventYearStart === currentYear) || (currentMonth < eventMonthEnd && eventYearEnd === currentYear)){
+    if(eventDateStart !== eventDateEnd){
+        return generateEventLink(event, eventStart, eventEnd, assignColorToId(event.id), show);
+    }else{
+        return '';
     }
+  }
 
-    // Si el evento no está dentro del mes y año actual, no mostrar nada
-    return '';
+  // Si el evento no está dentro del mes y año actual, no mostrar nada
+  return '';
 }
+
+function generateEventLink(event, eventStart, eventEnd, colorId, show, eventStatus=null) {
+  var eventTime = '';
+  if(eventStatus !== null){
+    if(eventStatus === true){
+        eventTime=eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    }else{
+        eventTime=eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    }
+  }else{
+    eventTime = eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' - ' + eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  
+  var eventTitle = show === false ? '&nbsp' : event.title;
+  var eventTime = show === false ? '&nbsp' : eventTime;
+
+  return `<a data-xtz-source="/account/calendar/edit/${event.id}" data-xtz-method="replaceHtml" data-xtz-container="#canvas-end" data-bs-toggle="offcanvas" class="c-event fc-event-draggable fc-event-resizable fc-event-start fc-event-end fc-event-future fc-daygrid-event fc-daygrid-dot-event fc-event-${colorId} mb-1"><div class="fc-event-time mr-1">${eventTime} </div><div class="fc-event-title" style="max-width:60px;overflow:hidden;text-overflow: ellipsis; white-space: nowrap;"> ${eventTitle}</div></a>`;
+}
+
+
 
 
 function previousMonth() {
@@ -216,4 +300,93 @@ function nextMonth() {
     generateCalendar(currentMonth, currentYear);
 }
 
+// Función para ir al año anterior
+function previousYear() {
+    currentYear--;
+    generateCalendar(currentMonth, currentYear);
+}
+
+// Función para ir al siguiente año
+function nextYear() {
+    currentYear++;
+    generateCalendar(currentMonth, currentYear);
+}
+
 generateCalendar(currentMonth, currentYear);
+// Agregar un manejador de eventos de clic al span "+"
+function showPopUpEvents() {
+  function handleClick() {
+      // Obtener el td padre
+      var tdParent = $(this).closest('td');
+      // Obtener la posición del td en la página
+      var tdOffset = tdParent.offset();
+      var month = parseInt($(this).closest('.fc-daygrid-day-frame').find('.hidden-month').text());
+      var date= parseInt(($(this).closest('.fc-daygrid-day-frame').find('.hidden-date').text()));
+      var year = parseInt(($(this).closest('.fc-daygrid-day-frame').find('.hidden-year').text()));
+      // Crear el canvas
+
+      var canvas = document.createElement('div');
+      canvas.classList.add('hidden-events-canvas');
+      canvas.style.position = 'absolute';
+      canvas.style.top = tdOffset.top + 'px';
+      canvas.style.left = tdOffset.left + 'px';
+      canvas.style.width = '200px';
+      canvas.style.height = '200px';
+      canvas.style.backgroundColor = '#25293c';
+      canvas.style.overflow = 'hidden'; // Ocultar el desplazamiento en el contenedor principal
+      //canvas.style.overflowY = 'auto'; // Eliminar esta línea
+      
+      // Construir el HTML del popup con los eventos del día
+      var canvas = document.createElement('div');
+canvas.classList.add('hidden-events-canvas');
+canvas.style.position = 'absolute';
+canvas.style.top = tdOffset.top + 'px';
+canvas.style.left = tdOffset.left + 'px';
+canvas.style.width = '200px';
+canvas.style.height = '220px';
+canvas.style.backgroundColor = '#25293c';
+canvas.style.overflow = 'hidden'; // Ocultar el desplazamiento en el contenedor principal
+//canvas.style.overflowY = 'auto'; // Eliminar esta línea
+
+// Construir el HTML del popup con los eventos del día
+var popupHTML = '<div class="fc-popover fc-more-popover" style="display:block;">';
+popupHTML += '<div class="fc-popover-header p-2" style="background-color:#7367f0;padding-left:10px;padding-right:10px;">';
+popupHTML += '<span class="fc-popover-title">' + months[month] + ' ' + $(this).closest('.fc-daygrid-day-frame').find('.fc-daygrid-day-number').text() + ', ' + year + '</span>'; // Modificado para incluir mes, fecha y año
+popupHTML += '<span class="fc-popover-close fc-icon fc-icon-x" title="Cerrar" style="float:right;"></span>';
+popupHTML += '</div>';
+popupHTML += '<div class="fc-popover-body mb-2" style="background-color:#25293c;padding-left:10px;padding:10px; overflow-y: auto;">'; // Añadir estilo de desplazamiento aquí
+
+// Contenedor para el cuerpo del popup
+popupHTML += '<div class="popup-body-container" style="max-height: 160px; overflow-y: auto;">'; // Ajusta la altura máxima según sea necesario
+
+var eventsToShow = getEventsForDay(month, year, date);
+var eventListHTML = eventsToShow.map(event => generateEventHTML(event, date, true)).join('');
+
+popupHTML += eventListHTML;
+
+popupHTML += '</div>'; // Cerrar el contenedor del cuerpo del popup
+popupHTML += '</div></div>';
+
+canvas.innerHTML = popupHTML;
+document.body.appendChild(canvas);
+
+          // Agregar un manejador de eventos de clic al canvas para cerrarlo al hacer clic fuera de él
+          $(document).on('click', function(event) {
+              if (!$(event.target).closest('.hidden-events-canvas').length) {
+                  $(canvas).remove(); // Eliminar el canvas
+              }
+          });
+
+          // Agregar evento de clic para cerrar el popup
+          $(document).on('click', '.fc-popover-close', function() {
+              $(canvas).remove(); // Eliminar el canvas
+          });
+      
+  }
+
+  // Asociar el manejador de eventos de clic a '.hidden-events' cada vez que se hace clic
+  $(document).on('click', '.hidden-events', handleClick);
+}
+
+
+
